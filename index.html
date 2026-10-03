@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101318">
+  <meta name="description" content="A clean, ad-free personal weather dashboard.">
+
+  <title>Weather</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+  <div class="app-shell">
+    <!-- Top bar -->
+    <header class="top-bar">
+      <div class="location-heading">
+        <button
+          id="open-location-search"
+          class="location-button"
+          type="button"
+          aria-label="Change location"
+        >
+          <span id="location-name">Ranson, WV</span>
+          <span class="location-chevron" aria-hidden="true">⌄</span>
+        </button>
+
+        <p id="last-updated" class="last-updated">Loading weather…</p>
+      </div>
+
+      <div class="top-actions">
+        <button
+          id="refresh-button"
+          class="icon-button"
+          type="button"
+          aria-label="Refresh weather"
+          title="Refresh weather"
+        >
+          ↻
+        </button>
+
+        <button
+          id="theme-button"
+          class="icon-button"
+          type="button"
+          aria-label="Switch theme"
+          title="Switch theme"
+        >
+          ☀
+        </button>
+      </div>
+    </header>
+
+    <!-- Search panel -->
+    <section id="location-panel" class="location-panel hidden" aria-label="Location search">
+      <form id="location-form" class="location-form">
+        <label class="sr-only" for="location-input">Search city or ZIP code</label>
+
+        <input
+          id="location-input"
+          type="search"
+          inputmode="search"
+          autocomplete="postal-code"
+          placeholder="Search city or ZIP code"
+        >
+
+        <button class="primary-button" type="submit">Search</button>
+      </form>
+
+      <div class="location-panel-actions">
+        <button id="use-home-location" class="text-button" type="button">
+          Use Ranson, WV
+        </button>
+      </div>
+
+      <div id="location-results" class="location-results"></div>
+    </section>
+
+    <!-- App-level status and alerts -->
+    <div id="status-message" class="status-message hidden" role="status"></div>
+    <section id="alerts-container" class="alerts-container" aria-label="Weather alerts"></section>
+
+    <main>
+      <!-- Today -->
+      <section id="view-today" class="view active-view" data-view="today">
+        <section class="current-card">
+          <div class="current-main">
+            <div>
+              <p id="current-condition" class="current-condition">Loading…</p>
+
+              <div class="temperature-row">
+                <span id="current-temperature" class="current-temperature">--°</span>
+                <span id="current-icon" class="current-icon" aria-hidden="true">☁️</span>
+              </div>
+
+              <p id="feels-like" class="feels-like">Feels like --°</p>
+            </div>
+
+            <div class="high-low">
+              <span>H: <strong id="today-high">--°</strong></span>
+              <span>L: <strong id="today-low">--°</strong></span>
+            </div>
+          </div>
+
+          <div class="current-details">
+            <article class="detail-tile">
+              <span class="detail-label">Humidity</span>
+              <strong id="current-humidity">--%</strong>
+            </article>
+
+            <article class="detail-tile">
+              <span class="detail-label">Wind</span>
+              <strong id="current-wind">-- mph</strong>
+            </article>
+
+            <article class="detail-tile">
+              <span class="detail-label">Gusts</span>
+              <strong id="current-gusts">-- mph</strong>
+            </article>
+
+            <article class="detail-tile">
+              <span class="detail-label">Rain chance</span>
+              <strong id="current-rain-chance">--%</strong>
+            </article>
+
+            <article class="detail-tile">
+              <span class="detail-label">Precipitation</span>
+              <strong id="today-precipitation">-- in</strong>
+            </article>
+
+            <article class="detail-tile">
+              <span class="detail-label">Sunrise / sunset</span>
+              <strong id="sun-times">-- / --</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="content-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Next 24 hours</p>
+              <h2>Hourly forecast</h2>
+            </div>
+
+            <button class="text-button view-link" type="button" data-target-view="hourly">
+              View all
+            </button>
+          </div>
+
+          <div id="today-hourly-strip" class="hourly-strip"></div>
+        </section>
+
+        <section class="content-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Outlook</p>
+              <h2>Forecast</h2>
+            </div>
+
+            <button class="text-button view-link" type="button" data-target-view="forecast">
+              View all
+            </button>
+          </div>
+
+          <div id="today-daily-list" class="daily-list compact"></div>
+        </section>
+      </section>
+
+      <!-- Hourly -->
+      <section id="view-hourly" class="view" data-view="hourly">
+        <div class="page-heading">
+          <p class="eyebrow">Next 24 hours</p>
+          <h1>Hourly</h1>
+        </div>
+
+        <section class="content-card flush-card">
+          <div id="full-hourly-list" class="full-hourly-list"></div>
+        </section>
+      </section>
+
+      <!-- Forecast -->
+      <section id="view-forecast" class="view" data-view="forecast">
+        <div class="page-heading">
+          <p class="eyebrow">Extended outlook</p>
+          <h1>Forecast</h1>
+          <p class="page-subtitle">Tap a day to show its available hourly forecast.</p>
+        </div>
+
+        <section class="content-card flush-card">
+          <div id="full-daily-list" class="daily-list"></div>
+        </section>
+      </section>
+
+      <!-- Radar -->
+      <section id="view-radar" class="view" data-view="radar">
+        <div class="page-heading">
+          <p class="eyebrow">External radar</p>
+          <h1>Radar</h1>
+          <p class="page-subtitle">
+            Choose a radar provider. Each option opens outside this app.
+          </p>
+        </div>
+
+        <div class="radar-options">
+          <article class="radar-card">
+            <div>
+              <p class="eyebrow">Official</p>
+              <h2>NWS Radar</h2>
+              <p>
+                National Weather Service interactive radar centered near the selected location.
+              </p>
+            </div>
+
+            <button id="open-nws-radar" class="primary-button wide-button" type="button">
+              Open NWS Radar ↗
+            </button>
+          </article>
+
+          <article class="radar-card">
+            <div>
+              <p class="eyebrow">Weather.com</p>
+              <h2>The Weather Channel</h2>
+              <p>
+                Opens The Weather Channel's interactive radar for the selected location.
+              </p>
+            </div>
+
+            <button id="open-twc-radar" class="secondary-button wide-button" type="button">
+              Open Weather Channel Radar ↗
+            </button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-button active" type="button" data-view-target="today">
+        <span class="nav-icon" aria-hidden="true">☀</span>
+        <span>Today</span>
+      </button>
+
+      <button class="nav-button" type="button" data-view-target="hourly">
+        <span class="nav-icon" aria-hidden="true">◷</span>
+        <span>Hourly</span>
+      </button>
+
+      <button class="nav-button" type="button" data-view-target="forecast">
+        <span class="nav-icon" aria-hidden="true">≡</span>
+        <span>Forecast</span>
+      </button>
+
+      <button class="nav-button" type="button" data-view-target="radar">
+        <span class="nav-icon" aria-hidden="true">◎</span>
+        <span>Radar</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
