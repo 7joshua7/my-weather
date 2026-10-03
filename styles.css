@@ -622,9 +622,15 @@ html[data-theme="light"] .radar-card {
   color: var(--text-muted);
 }
 
+/* Expanded hourly forecast nested beneath a selected day */
 .day-hourly {
   display: none;
-  padding: 0 0 14px;
+
+  margin: 0 4px 14px;
+  padding: 10px 10px 12px 18px;
+
+  border-radius: var(--radius-small);
+  background: var(--surface-raised);
 }
 
 .daily-item.expanded .day-hourly {
@@ -632,12 +638,19 @@ html[data-theme="light"] .radar-card {
 }
 
 .day-hourly .hour-row {
-  padding-inline: 8px;
+  padding: 12px 8px 12px 14px;
+
   border-radius: 10px;
+  border-bottom-color: var(--border);
+}
+
+.day-hourly .hour-row:last-child {
+  border-bottom: 0;
 }
 
 .day-hourly-note {
-  margin: 8px 6px 12px;
+  margin: 4px 8px 10px;
+
   color: var(--text-muted);
   font-size: 0.84rem;
 }
