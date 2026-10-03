@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   loadTheme();
   bindEvents();
-  registerServiceWorker();
+  //registerServiceWorker(); Disabling Service Worker Caching
   updateLocationHeading();
 
   await loadWeather();
@@ -873,18 +873,19 @@ function hideStatus() {
   elements.statusMessage.classList.remove("error");
 }
 
+// //////// Disabling Service Worker Caching //////
 // -----------------------------
 // Progressive Web App
 // -----------------------------
 
-function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) {
-    return;
-  }
+// function registerServiceWorker() {
+//   if (!("serviceWorker" in navigator)) {
+//     return;
+//   }
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-      console.warn("Service worker registration failed:", error);
-    });
-  });
-}
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+//       console.warn("Service worker registration failed:", error);
+//     });
+//   });
+// }
