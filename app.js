@@ -581,7 +581,8 @@ function openWeatherChannelRadar() {
     .join(" ");
 
   const url =
-    `https://weather.com/weather/radar/interactive/l/${encodeURIComponent(locationText)}`;
+    //`https://weather.com/weather/radar/interactive/l/${encodeURIComponent(locationText)}`;
+    'https://weather.com/us/west-virginia/city/ranson/radar';
 
   window.open(url, "_blank", "noopener");
 }
