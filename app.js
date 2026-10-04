@@ -26,6 +26,11 @@ const state = {
   refreshTimer: null
 };
 
+let locationSearchTimer = null;
+
+const LOCATION_SEARCH_DELAY_MS = 350;
+const LOCATION_SEARCH_MIN_LENGTH = 3;
+
 // -----------------------------
 // DOM references
 // -----------------------------
@@ -91,6 +96,8 @@ async function init() {
 // -----------------------------
 
 function bindEvents() {
+  elements.locationInput.addEventListener("input", handleLocationInput);
+  
   elements.refreshButton.addEventListener("click", loadWeather);
   elements.themeButton.addEventListener("click", toggleTheme);
 
@@ -420,6 +427,24 @@ function renderAlerts() {
 // Location search
 // -----------------------------
 
+function handleLocationInput() {
+  const query = elements.locationInput.value.trim();
+
+  // Cancel any pending search from the previous keystroke.
+  window.clearTimeout(locationSearchTimer);
+
+  // Clear suggestions when the input is too short.
+  if (query.length < LOCATION_SEARCH_MIN_LENGTH) {
+    elements.locationResults.innerHTML = "";
+    return;
+  }
+
+  // Wait briefly so we don't call the API on every keystroke.
+  locationSearchTimer = window.setTimeout(() => {
+    searchLocations(query);
+  }, LOCATION_SEARCH_DELAY_MS);
+}
+
 function toggleLocationPanel() {
   elements.locationPanel.classList.toggle("hidden");
 
@@ -428,15 +453,20 @@ function toggleLocationPanel() {
   }
 }
 
-async function handleLocationSearch(event) {
+function handleLocationSearch(event) {
   event.preventDefault();
 
   const query = elements.locationInput.value.trim();
 
-  if (!query) {
+  if (query.length < LOCATION_SEARCH_MIN_LENGTH) {
     return;
   }
 
+  window.clearTimeout(locationSearchTimer);
+  searchLocations(query);
+}
+
+async function searchLocations(query) {
   elements.locationResults.innerHTML =
     '<div class="status-message">Searching locations…</div>';
 
