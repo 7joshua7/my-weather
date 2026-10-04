@@ -31,6 +31,33 @@ let locationSearchTimer = null;
 const LOCATION_SEARCH_DELAY_MS = 350;
 const LOCATION_SEARCH_MIN_LENGTH = 3;
 
+const FAVORITE_LOCATIONS = [
+  {
+    name: "Frederick, MD",
+    postalCode: "21702"
+  },
+  {
+    name: "Germantown, MD",
+    postalCode: "20874"
+  },
+  {
+    name: "Gaithersburg, MD",
+    postalCode: "20877"
+  },
+  {
+    name: "McLean, VA",
+    postalCode: "22102"
+  },
+  {
+    name: "Washington, DC",
+    postalCode: "20006"
+  },
+  {
+    name: "Hamilton, VA",
+    postalCode: "20158"
+  }
+];
+
 // -----------------------------
 // DOM references
 // -----------------------------
@@ -40,6 +67,9 @@ const elements = {
   lastUpdated: document.querySelector("#last-updated"),
   refreshButton: document.querySelector("#refresh-button"),
   themeButton: document.querySelector("#theme-button"),
+
+  toggleFavorites: document.querySelector("#toggle-favorites"),
+  favoritesList: document.querySelector("#favorites-list"),
 
   openLocationSearch: document.querySelector("#open-location-search"),
   locationPanel: document.querySelector("#location-panel"),
@@ -83,6 +113,7 @@ async function init() {
   loadTheme();
   bindEvents();
   //registerServiceWorker(); Disabling Service Worker Caching
+  renderFavorites();
   updateLocationHeading();
 
   await loadWeather();
@@ -97,6 +128,8 @@ async function init() {
 
 function bindEvents() {
   elements.locationInput.addEventListener("input", handleLocationInput);
+
+  elements.toggleFavorites.addEventListener("click", toggleFavorites);
   
   elements.refreshButton.addEventListener("click", loadWeather);
   elements.themeButton.addEventListener("click", toggleTheme);
@@ -426,6 +459,88 @@ function renderAlerts() {
 // -----------------------------
 // Location search
 // -----------------------------
+
+function renderFavorites() {
+  elements.favoritesList.innerHTML = FAVORITE_LOCATIONS
+    .map(
+      (location, index) => `
+        <button
+          class="favorite-location"
+          type="button"
+          data-favorite-index="${index}"
+        >
+          <strong>${escapeHtml(location.name)}</strong>
+          <span>${escapeHtml(location.postalCode)}</span>
+        </button>
+      `
+    )
+    .join("");
+
+  document.querySelectorAll("[data-favorite-index]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const favorite =
+        FAVORITE_LOCATIONS[Number(button.dataset.favoriteIndex)];
+
+      await selectFavoriteLocation(favorite);
+    });
+  });
+}
+
+function toggleFavorites() {
+  elements.favoritesList.classList.toggle("hidden");
+}
+
+async function selectFavoriteLocation(favorite) {
+  elements.locationResults.innerHTML =
+    '<div class="status-message">Loading location…</div>';
+
+  try {
+    const params = new URLSearchParams({
+      name: favorite.postalCode,
+      count: "5",
+      language: "en",
+      format: "json",
+      countryCode: "US"
+    });
+
+    const response = await fetch(`${GEOCODING_API}?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`Geocoding returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    const result = data.results?.[0];
+
+    if (!result) {
+      throw new Error("Favorite location was not found.");
+    }
+
+    state.location = {
+      name: favorite.name.split(",")[0],
+      admin1: result.admin1 ?? "",
+      admin1Code: result.admin1_code ?? "",
+      country: result.country ?? "United States",
+      countryCode: result.country_code ?? "US",
+      postalCode: favorite.postalCode,
+      latitude: result.latitude,
+      longitude: result.longitude
+    };
+
+    elements.locationPanel.classList.add("hidden");
+    elements.favoritesList.classList.add("hidden");
+    elements.locationResults.innerHTML = "";
+    elements.locationInput.value = "";
+
+    updateLocationHeading();
+    await loadWeather();
+  } catch (error) {
+    console.error("Favorite location failed:", error);
+
+    elements.locationResults.innerHTML =
+      '<div class="status-message error">Could not load that favorite location.</div>';
+  }
+}
 
 function handleLocationInput() {
   const query = elements.locationInput.value.trim();
