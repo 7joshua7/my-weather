@@ -212,6 +212,58 @@ html[data-theme="light"] .primary-button {
    Location search
 ----------------------------- */
 
+.location-panel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-top: 8px;
+}
+
+/* Preset favorite locations */
+.favorites-list {
+  display: grid;
+  gap: 8px;
+
+  margin-top: 10px;
+  padding-top: 10px;
+
+  border-top: 1px solid var(--border);
+}
+
+.favorite-location {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  width: 100%;
+  padding: 11px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+
+  background: var(--surface-raised);
+  color: var(--text);
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.favorite-location:hover {
+  background: var(--surface-hover);
+}
+
+.favorite-location strong {
+  font-size: 0.92rem;
+}
+
+.favorite-location span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 .location-panel {
   margin-bottom: 18px;
   padding: 16px;
